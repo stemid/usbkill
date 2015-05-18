@@ -1,45 +1,50 @@
-![usbkill](Resources/USBKillBanner.gif)
+# USBKill
 
-« usbkill » is an anti-forensic kill-switch that waits for a change on your USB ports and then immediately shuts down your computer.
+A tool that shuts down your computer if USB devices change, for example if you unplug or plug-in a device. 
 
-To run:
+## Run
 
-```shell
-sudo python usbkill.py
-```
+  sudo python usbkill.py
 
-### Why?
+## Depends on
 
-Some reasons to use this tool:
+  * Python 2.7
 
-- In case the police or other thugs come busting in (or steal your laptop from you when you are at a public library as happened to Ross). The police commonly uses a « [mouse jiggler](http://www.amazon.com/Cru-dataport-Jiggler-Automatic-keyboard-Activity/dp/B00MTZY7Y4/ref=pd_bxgy_pc_text_y/190-3944818-7671348) » to keep the screensaver and sleep mode from activating.
-- You don’t want someone retrieve documents (such as private keys) from your computer or install malware/backdoors via USB.
-- You want to improve the security of your (Full Disk Encrypted) home or corporate server (e.g. Your Raspberry).
+## Configuration
 
-> **[!] Important**: Make sure to use (partial) disk encryption! Otherwise they will get in anyway.
+Sample configuration file with defaults filled in.
 
-> **Tip**: Additionally, you may use a cord to attach a USB key to your wrist. Then insert the key into your computer and start usbkill. If they steal your computer, the USB will be removed and the computer shuts down immediately.
+  [usbkill]
+  log_maxsize: 20971520
+  log_file: 
+  log_format: %(asctime)s %(filename)s[%(levelname)s]: %(message)s
+  log_maxcopies: 2
+  log_level: ERROR
+  do_sync: True
+  kill_commands: []
+  shutdown: True
+  sleep_time: 0.25
+  whitelist: []
+  duplicate_check: True
 
-### Feature List
+See `python usbkill.py --help` for more info. 
 
-- Compatible with Linux, *BSD and OS X.
-- Shutdown the computer when there is USB activity.
-- Customizable. Define which commands should be executed just before shut down.
-- Ability to whitelist a USB device.
-- Ability to change the check interval (default: 250ms).
-- Ability to melt the program on shut down.
-- Works with sleep mode (OS X).
-- No dependency except srm. ```sudo apt-get install secure-delete```
-- Sensible defaults
+# Fork info
 
+This is a fork of [https://github.com/hephaest0s/usbkill](usbkill) by hephaest0s. 
 
-### Supported command line arguments (mainly for devs):
+I've kept most of the features so please do check the original README, but here is a list of changes. 
 
-- --no-shut-down: Execute all the (destructive) commands you defined in settings.ini, but don’t turn off the computer.
-- --cs: Copy program folder settings.ini to /etc/usbkill/settings.ini
-
-### Contact
-
-[hephaestos@riseup.net](mailto:hephaestos@riseup.net) - PGP/GPG Fingerprint: 8764 EF6F D5C1 7838 8D10 E061 CF84 9CE5 42D0 B12B
+  * Stripped almost 100 lines of code
+  * Depends on argparse instead of doing its own parsing of sys.argv
+  * No Python3 support with ConfigParse
+  * Depends on logger instead of implementing its own solution
+  * No shredding of logs or data supported
+  * Added ability to reload configuration file when SIGUSR1 is received
+  * Limited the configuration files to ./usbkill.conf and /etc/usbkill.conf
+  * Added option to skip duplicate USB IDs checking
 
 
+# Contact
+
+Stefan Midjich (contact me through github)
