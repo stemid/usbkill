@@ -43,6 +43,8 @@ config_files = [
     '/etc/usbkill.conf', 
     './usbkill.conf'
 ]
+
+# Defaults
 config = SafeConfigParser({
     'log_maxsize': '20971520',
     'log_file': '',
@@ -61,7 +63,7 @@ config.read(config_files)
 # It is required to add this section in memory if the config file does not exist
 try:
     config.add_section('usbkill')
-except DuplicateSectionError as e:
+except DuplicateSectionError:
     pass
 
 # https://docs.python.org/2/library/logging.html#levels
@@ -96,7 +98,7 @@ if config.get('usbkill', 'log_file') is not '':
     handler.setFormatter(formatter)
     log.addHandler(handler)
 
-# Log current USB state
+# Logs current USB state
 def logusb():
     if 'DARWIN' in current_platform.upper():
         usboutput = subprocess.check_output("system_profiler SPUSBDataType", shell=True)
@@ -152,10 +154,25 @@ def lsusb_darwin():
         except KeyError:
             # Check if vendor_id/product_id is available for this one
             try:
-                assert "vendor_id" in result and "product_id" in result
-                # Append to the list of devices
-                devices.append(DEVICE_RE[1].findall(result["vendor_id"])[0] + ':' + DEVICE_RE[1].findall(result["product_id"])[0])
-            except AssertionError: {}
+                vendor_id = result['vendor_id']
+                product_id = result['product_id']
+            except KeyError:
+                try:
+                    vendor_id = result['b_vendor_id']
+                    product_id = result['a_product_id']
+                except KeyError:
+                    vendor_id = None
+                    product_id = None
+
+            # Append to the list of devices
+            if vendor_id and product_id:
+                if vendor_id != 'apple_vendor_id':
+                    devices.append(
+                        '{0}:{1}'.format(
+                            DEVICE_RE[1].findall(vendor_id)[0],
+                            DEVICE_RE[1].findall(product_id)[0]
+                        )
+                    )
         
         # Check if there are items inside
         try:
@@ -171,6 +188,7 @@ def lsusb_darwin():
         check_inside(result, devices)
     return devices
     
+# List USB devices
 def lsusb():
     # A Python version of the command 'lsusb' that returns a list of connected usbids
     if 'DARWIN' in current_platform.upper():
@@ -180,6 +198,7 @@ def lsusb():
         # Use lsusb on linux and bsd
         return DEVICE_RE[0].findall(subprocess.check_output("lsusb", shell=True).decode('utf-8').strip())
 
+# Reload configuration signal handler
 def reload_handler(signum, frame):
     log.info('Reload signal received, reloading configuration...')
     try:
@@ -189,6 +208,7 @@ def reload_handler(signum, frame):
     else:
         log.info('Reloaded configuration')
 
+# Exit signal handler
 def exit_handler(signum, frame):
     log.info('Exit signal received, exiting...')
     sys.exit(0)
@@ -234,6 +254,7 @@ def main():
     for sig in [signal.SIGINT, signal.SIGTERM, signal.SIGQUIT, ]:
         signal.signal(sig, exit_handler)
 
+    # Reload configuration handler
     signal.signal(signal.SIGUSR1, reload_handler)
 
     if not args.shutdown:
@@ -246,7 +267,6 @@ def main():
         config.set('usbkill', 'log_level', 'DEBUG')
         log.setLevel(loglevels[config.get('usbkill', 'log_level')])
     
-    # Start main loop
     start_devices = lsusb()
     acceptable_devices = set(
         start_devices + jsonloads(config.get('usbkill', 'whitelist').strip())
@@ -257,6 +277,7 @@ def main():
     ))
     logusb()
 
+    # Start main loop
     while True:
         current_devices = lsusb()
 
