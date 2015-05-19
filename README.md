@@ -4,28 +4,32 @@ A tool that shuts down your computer if USB devices change, for example if you u
 
 ## Run
 
-  sudo python usbkill.py
+    sudo python usbkill.py
 
 ## Depends on
 
   * Python 2.7
 
+## Installation
+
+    python setup.py install
+
 ## Configuration
 
 Sample configuration file with defaults filled in.
 
-  [usbkill]
-  log_maxsize: 20971520
-  log_file: 
-  log_format: %(asctime)s %(filename)s[%(levelname)s]: %(message)s
-  log_maxcopies: 2
-  log_level: ERROR
-  do_sync: True
-  kill_commands: []
-  shutdown: True
-  sleep_time: 0.25
-  whitelist: []
-  duplicate_check: True
+    [usbkill]
+    log_maxsize: 20971520
+    log_file: 
+    log_format: %(asctime)s %(filename)s[%(levelname)s]: %(message)s
+    log_maxcopies: 2
+    log_level: ERROR
+    do_sync: True
+    kill_commands: []
+    shutdown: True
+    sleep_time: 0.25
+    whitelist: []
+    duplicate_check: True
 
 See `python usbkill.py --help` for more info. 
 
