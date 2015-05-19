@@ -99,9 +99,9 @@ if config.get('usbkill', 'log_file') is not '':
 # Log current USB state
 def logusb():
     if 'DARWIN' in current_platform.upper():
-        usboutput = subprocess.check_output("system_profiler SPUSBDataType")
+        usboutput = subprocess.check_output("system_profiler SPUSBDataType", shell=True)
     else:
-        usboutput = subprocess.check_output("lsusb")
+        usboutput = subprocess.check_output("lsusb", shell=True)
 
     log.info(usboutput)
 
@@ -143,10 +143,7 @@ def lsusb_darwin():
         "system_profiler SPUSBDataType -xml -detailLevel mini", 
         shell=True
     )
-    if sys.version_info[0] == 2:
-        df = plistlib.readPlistFromString(df)
-    elif sys.version_info[0] == 3:
-        df = plistlib.loads(df)
+    df = plistlib.readPlistFromString(df)
 
     def check_inside(result, devices):
         # Do not take devices with Built-in_Device=Yes
@@ -161,7 +158,6 @@ def lsusb_darwin():
             except AssertionError: {}
         
         # Check if there are items inside
-        # FIXME: Figure this out
         try:
             for result_deep in result["_items"]:
                 # Check what's inside the _items array
