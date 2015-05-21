@@ -9,7 +9,8 @@ setup(
     version = "1.0",
     author = "Stefan Midjich",
     author_email = "swehack@gmail.com",
-    description = ("A tool that shuts down your computer if USB devices change"),
+    description = ("A tool that shuts down your computer if USB devices"
+                   " change"),
     license = "GPLv3",
     keywords = "usb shutdown privacy",
     url = "https://github.com/stemid/usbkill",
